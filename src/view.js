@@ -81,7 +81,7 @@ export default class NotesView {
       .querySelectorAll(".notes__list-item")
       .forEach((noteListItem) => {
         noteListItem.addEventListener("click", () => {
-          this.onNoteSelect(noteListItem.dataset.noteId);
+          this.onNoteSelect(parseInt(noteListItem.dataset.noteId));
         });
 
         noteListItem.addEventListener("dblclick", () => {
