@@ -14,7 +14,7 @@ export default class NotesAPI {
     });
   }
 
-  static saveNote(noteToSave: { id?: number, title: string, body: string }) {
+  static saveNote(noteToSave: { id?: Note['id'], title: Note['title'], body: Note['body'] }) {
     const notes = NotesAPI.getAllNotes();
     if (noteToSave.id) {
       // Edit/Update

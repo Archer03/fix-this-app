@@ -91,10 +91,21 @@ const NotesSideBar = styled.div`
 `
 
 const NoteAddBtn = styled.button`
-  background: #009578;
+  background-image: ${({ theme }) => {
+    const gradient = {
+      light: 'linear-gradient(to right, #02AAB0 0%, #00CDAC  51%, #02AAB0  100%)',
+      // dark: 'linear-gradient(to right, #FEAC5E 0%, #C779D0  51%, #FEAC5E  100%)'
+      dark: 'linear-gradient(to right, #fc00ff 0%, #00dbde  51%, #fc00ff  100%)'
+    }
+    return gradient[theme.color];
+  }};
+  text-transform: uppercase;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;
+  display: block;
   border: none;
   border-radius: 7px;
-  color: #ffffff;
   cursor: pointer;
   font-size: 1.25em;
   font-weight: bold;
@@ -102,7 +113,9 @@ const NoteAddBtn = styled.button`
   padding: 0.75em 0;
   width: 100%;
   &:hover {
-    background: #00af8c;
+    background-position: right center; /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
   }
 `
 
@@ -111,12 +124,21 @@ const NotesListItem = styled.div<{ active: boolean }>`
   border: 2px dotted;
   margin: 2px;
   border-radius: 10px;
-  ${props => !props.active ? '' : `
-    background: #eeeeee;
-    border-radius: 7px;
-    font-weight: bold;
-    border-radius: 10px;
-  `}
+  ${props => {
+    if (!props.active) return '';
+    const activeBackground = {
+      light: `
+        background-image: linear-gradient(315deg, #eeeeee 0%, #b3cdd185 74%);
+      `,
+      dark: `
+        background-image: linear-gradient(315deg, #045de9 0%, #11b1ff 74%);
+      `
+    }
+    return `
+      font-weight: bold;
+      ${activeBackground[props.theme.color]};
+    `
+  }}
 `
 
 const Small_Title_Update = `
