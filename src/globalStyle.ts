@@ -75,14 +75,17 @@ const ShakeLittleFrames = keyframes`
   }
 `
 
-export const ShakeCss = css`
+const ShakeAnimation = css`
+  animation-name: ${ShakeLittleFrames};
+  animation-duration: 300ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+`
+export const ShakeCss = css<{ shaking?: boolean }>`
   display: inherit;
   transform-origin: center center;
   &:hover {
-    /* animation-play-state: running; */
-    animation-name: ${ShakeLittleFrames};
-    animation-duration: 300ms;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite; 
+    ${ShakeAnimation}
   }
+  ${props => props.shaking && ShakeAnimation}
 `

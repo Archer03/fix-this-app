@@ -1,7 +1,7 @@
 import styled, { useTheme } from "styled-components"
 
 type HeaderProps = {
-  toggleTheme: Function
+  toggleTheme: () => void
 }
 const Header = (props: HeaderProps) => {
   const theme = useTheme()
