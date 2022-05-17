@@ -8,8 +8,8 @@ const Header = (props: HeaderProps) => {
   const theme = useTheme();
   const location = useLocation();
   const buttonText = {
-    dark: '日间模式',
-    light: '暗黑模式'
+    dark: '暗黑模式🌙',
+    light: '日间模式🌤️'
   }[theme.color];
   return <HeaderWrapper>
     <NavArea>
@@ -100,8 +100,12 @@ const ChangeThemeBtn = styled.button`
 
 
   &::before {
-    content: '';
-    z-index: -1;
+    content: ${props => ({
+      light: "'暗黑模式🌙'",
+      dark: "'日间模式🌤️'"
+    }[props.theme.color])};
+    padding-top: 8px;
+    z-index: 1;
     position: absolute;
     top: 0;
     bottom: 0;

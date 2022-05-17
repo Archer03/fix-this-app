@@ -7,7 +7,7 @@ import Dialog from "../../components/dialog";
 const MAX_BODY_LENGTH = 60;
 
 const View = () => {
-  const [notes, setNotes] = useState<Note[]>([])
+  const [notes, setNotes] = useState<Note[]>([]);
   const getNotes = useCallback(() => setNotes(NotesAPI.getAllNotes()), []);
   const { onNoteAdd, onNoteEdit, onNoteDelete } = useMemo(() => ({
     onNoteAdd: () => {

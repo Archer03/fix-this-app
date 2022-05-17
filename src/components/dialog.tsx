@@ -10,7 +10,7 @@ type DialogProps = React.PropsWithChildren<{
   title?: React.ReactNode
   onOk?: Function
   onCancel?: Function
-  showBackdrop? :boolean
+  showBackdrop?: boolean
 }>
 const Dialog = (props: DialogProps) => {
   const [renderDiv, setRenderDiv] = useState<HTMLElement>();
@@ -56,7 +56,10 @@ const Dialog = (props: DialogProps) => {
         </div>
       </div>
     </DialogLayout>
-    {showBackdrop && <ModalBackDrop animationVisible={animationVisible} />}
+    {showBackdrop && <ModalBackDrop
+      animationVisible={animationVisible}
+      onClick={() => onCancel && onCancel()}
+    />}
   </>, renderDiv);
 }
 

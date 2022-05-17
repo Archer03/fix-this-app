@@ -12,7 +12,7 @@ const FileDragger = (props: FileDraggerProps) => {
   const readFile: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     const file = e.dataTransfer?.files?.[0];
-    if (file!) return;
+    if (!file) return;
     setFile(file);
     const reader = new FileReader();
     reader.readAsBinaryString(file);
