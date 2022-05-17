@@ -40,27 +40,32 @@ const View = (props: ViewProps) => {
   const titleRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   return <>
-    <NotesSideBar>
-      <NoteAddBtn type="button" onClick={onNoteAdd}>添加新的笔记 📒</NoteAddBtn>
-      {
-        notes.map((note) =>
-          <NoteItemWrapper note={note} key={note.id}
-            activeNoteId={activeNoteId}
-            setActiveNoteId={setActiveNoteId}
-            onNoteDelete={onNoteDelete}
-          />
-        )
-      }
-    </NotesSideBar>
+    <NoteViewLayout>
+      <NotesSideBar>
+        <NoteAddBtn onClick={onNoteAdd}>添加新的笔记 📒</NoteAddBtn>
+        <NoteScroll>
+          {
+            notes.map((note) =>
+              <NoteItemWrapper note={note} key={note.id}
+                activeNoteId={activeNoteId}
+                setActiveNoteId={setActiveNoteId}
+                onNoteDelete={onNoteDelete}
+              />
+            )
+          }
+        </NoteScroll>
+      </NotesSideBar>
 
-    {
-      activeNote && <NotesPreview>
-        <NoteTitle type="text" placeholder="新笔记..."
-          ref={titleRef} onBlur={editNote} />
-        <NoteBody
-          ref={bodyRef} onBlur={editNote} />
-      </NotesPreview>
-    }
+      {
+        activeNote && <NotesPreview>
+          <NoteTitle>
+            <input type="text" placeholder="新笔记..." ref={titleRef} />
+            <NoteSaveBtn title="保存" onClick={editNote} />
+          </NoteTitle>
+          <NoteBody ref={bodyRef} />
+        </NotesPreview>
+      }
+    </NoteViewLayout>
   </>
 }
 export default View;
@@ -123,13 +128,39 @@ const NoteItemWrapper = (props: NoteItemWrapperProps) => {
   </NotesListItem>
 }
 
+const NoteViewLayout = styled.div`
+  display: flex;
+  height: calc(100vh - 60px);
+`
 
 const NotesSideBar = styled.div`
   border-right: 2px solid #dddddd;
   flex-shrink: 0;
-  overflow-y: auto;
   padding: 1em;
+  box-sizing: border-box;
   width: 300px;
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+`
+
+const NoteScroll = styled.div`
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+      width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+      background-color: transparent;
+      -webkit-border-radius: 2em;
+      -moz-border-radius: 2em;
+      border-radius:2em;
+  }
+  ::-webkit-scrollbar-thumb {
+      background-color:#ccc;
+      -webkit-border-radius: 2em;
+      -moz-border-radius: 2em;
+      border-radius:2em;
+  }
 `
 
 const NoteAddBtn = styled.button`
@@ -199,12 +230,6 @@ const NotesSmallUpdate = styled.div`
   text-align: right;
 `
 
-const NotesPreview = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 2em 3em;
-  flex-grow: 1;
-`
 
 const NoteSmallBody = styled.div`
   padding: 0 10px;
@@ -238,15 +263,88 @@ const NoteBtns = styled.div<{ isShowBtns: boolean }>`
   ${props => props.isShowBtns && `right: 0;`}
 `
 
+const NotesPreview = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 2em 3em;
+  flex-grow: 1;
+  background-color: ${props => ({
+    light: '#f7f4f4',
+    dark: '#adb2cd'
+  })[props.theme.color]};
+  border: f7f4f4 solid 20px;
+  border-radius: 20px;
+  margin: 20px 30px 30px 30px;
+`
+
+const NoteSaveBtn = styled.div`
+  cursor: pointer;
+  display: flex;
+  width: 2.5em;
+  height: 2.5em;
+  border: 3px solid transparent;
+  border-top-color: ${props => ({
+    light: '#3cefff',
+    dark: '#fc2f70'
+  })[props.theme.color]};
+  border-bottom-color: ${props => ({
+    light: '#3cefff',
+    dark: '#fc2f70'
+  })[props.theme.color]};
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+  animation-play-state: paused;
+  &:hover {
+    animation-play-state: running;
+    &::before {
+      animation-play-state: running;
+    }
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    margin: auto;
+    width: 1.25em;
+    height: 1.25em;
+    border: 3px solid ${props => ({
+    light: '#3cefff',
+    dark: '#fc2f70'
+  })[props.theme.color]};
+    border-radius: 50%;
+    animation: pulse 1s alternate ease-in-out infinite;
+    animation-play-state: paused;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pulse {
+    from {
+      transform: scale(0.5);
+    }
+    to {
+      transform: scale(0.8);
+    }
+  }
+`
+
 const NoteTitle_Body = `
   border: none;
   outline: none;
   width: 100%;
+  background-color: transparent;
 `
-const NoteTitle = styled.input`
-  ${NoteTitle_Body}
-  font-size: 3em;
-  font-weight: bold;
+const NoteTitle = styled.div`
+  display: flex;
+  input {
+    ${NoteTitle_Body}
+    font-size: 3em;
+    font-weight: bold;
+  }
 `
 
 const NoteBody = styled.textarea`

@@ -3,18 +3,18 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import styled from "styled-components";
 
-type DialogProps = {
+type DialogProps = React.PropsWithChildren<{
   visible: boolean
   width?: number
   height?: number
   title?: React.ReactNode
-  content?: React.ReactNode
   onOk?: Function
   onCancel?: Function
-}
+  showBackdrop? :boolean
+}>
 const Dialog = (props: DialogProps) => {
   const [renderDiv, setRenderDiv] = useState<HTMLElement>();
-  const { visible, height, width, title, content, onCancel, onOk } = props;
+  const { visible, height, width, title, onCancel, onOk, showBackdrop = true } = props;
   const uninstallDomTimerRef = useRef<number>();
 
   useLayoutEffect(() => {
@@ -49,14 +49,14 @@ const Dialog = (props: DialogProps) => {
       <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
         <Title>{title}</Title>
         <Divider />
-        <div style={{ flexGrow: 1 }}>{content}</div>
+        <div style={{ flexGrow: 1 }}>{props.children}</div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 3px 3px 0' }}>
           <CancelButton onClick={() => onCancel && onCancel()}>取消</CancelButton>
           <DeleteButton onClick={() => onOk && onOk()}>删除</DeleteButton>
         </div>
       </div>
     </DialogLayout>
-    {<ModalBackDrop animationVisible={animationVisible} />}
+    {showBackdrop && <ModalBackDrop animationVisible={animationVisible} />}
   </>, renderDiv);
 }
 
