@@ -1,19 +1,35 @@
-import type { Handlers } from "./app";
-import React, { useEffect, useRef, useState } from 'react';
-import { Note } from "./api";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import NotesAPI, { Note } from "./api";
 import styled from "styled-components";
-import { ShakeCss } from "./globalStyle";
-import Dialog from "./components/dialog";
+import { ShakeCss } from "../../globalStyle";
+import Dialog from "../../components/dialog";
 
 const MAX_BODY_LENGTH = 60;
 
-type ViewProps = {
-  notes: Note[]
-  handlers: Handlers
-}
-const View = (props: ViewProps) => {
-  const { notes, handlers } = props;
-  const { onNoteAdd, onNoteDelete, onNoteEdit } = handlers;
+const View = () => {
+  const [notes, setNotes] = useState<Note[]>([])
+  const getNotes = useCallback(() => setNotes(NotesAPI.getAllNotes()), []);
+  const { onNoteAdd, onNoteEdit, onNoteDelete } = useMemo(() => ({
+    onNoteAdd: () => {
+      NotesAPI.saveNote({
+        title: "新建笔记",
+        body: "开始记录..."
+      });
+      getNotes()
+    },
+    onNoteEdit: (note: Omit<Note, 'updated'>) => {
+      NotesAPI.saveNote(note);
+      getNotes()
+    },
+    onNoteDelete: (noteId: number) => {
+      NotesAPI.deleteNote(noteId);
+      getNotes()
+    }
+  }), []);
+
+  useEffect(() => {
+    getNotes(); // 如果是请求则要取消订阅
+  }, []);
 
   const [activeNoteId, setActiveNoteId] = useState<number | undefined>(undefined);
   const activeNote = notes.find(note => note.id === activeNoteId);
