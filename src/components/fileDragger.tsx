@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 type FileDraggerProps = {
@@ -11,20 +11,16 @@ const FileDragger = (props: FileDraggerProps) => {
 
   const readFile: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
+    const file = e.dataTransfer?.files?.[0];
+    if (file!) return;
     setFile(file);
-    console.log(file);
+    const reader = new FileReader();
+    reader.readAsBinaryString(file);
+    reader.onload = () => {
+      onFileDrop(reader.result?.toString() || '');
+    }
   }
 
-  useEffect(() => {
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsBinaryString(file);
-      reader.onload = () => {
-        onFileDrop(reader.result?.toString() || '');
-      }
-    }
-  }, [file])
   return <DragToUpload isHighlight={isDragIn}
     onDragEnter={() => setDragIn(true)}
     onDragLeave={() => setDragIn(false)}
