@@ -5,24 +5,29 @@ import { ShakeCss } from "../../globalStyle";
 import Dialog from "../../components/dialog";
 import { ReactComponent as DeleteSvg } from "../../assets/svg/delete_fill.svg";
 import { ReactComponent as PinSvg } from "../../assets/svg/pin-fill.svg";
+import { ReactComponent as PaintPinSvg } from "../../assets/svg/pushpin.svg";
 
 const View = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const getNotes = useCallback(() => setNotes(NotesAPI.getAllNotes()), []);
-  const { onNoteAdd, onNoteEdit, onNoteDelete } = useMemo(() => ({
+  const { onNoteAdd, onNoteEdit, onNoteDelete, onNotePin } = useMemo(() => ({
     onNoteAdd: () => {
-      NotesAPI.saveNote({
+      NotesAPI.addNote({
         title: "新建笔记",
         body: "开始记录..."
       });
       getNotes()
     },
-    onNoteEdit: (note: Omit<Note, 'updated'>) => {
-      NotesAPI.saveNote(note);
+    onNoteEdit: (note: Parameters<typeof NotesAPI.editNote>[0]) => {
+      NotesAPI.editNote(note);
       getNotes()
     },
     onNoteDelete: (noteId: number) => {
       NotesAPI.deleteNote(noteId);
+      getNotes()
+    },
+    onNotePin: (noteId: number, isPined: boolean) => {
+      NotesAPI.pinNote(noteId, isPined);
       getNotes()
     }
   }), []);
@@ -66,6 +71,7 @@ const View = () => {
                 activeNoteId={activeNoteId}
                 setActiveNoteId={setActiveNoteId}
                 onNoteDelete={onNoteDelete}
+                onNotePin={onNotePin}
               />
             )
           }
@@ -92,14 +98,19 @@ type NoteItemWrapperProps = {
   note: Note
   setActiveNoteId: (id: number) => void
   onNoteDelete: (id: number) => void
+  onNotePin: (id: number, isPined: boolean) => void
 }
 const NoteItemWrapper = (props: NoteItemWrapperProps) => {
-  const { activeNoteId, note, setActiveNoteId, onNoteDelete } = props;
-  const { id, title, body, updated } = note;
+  const { activeNoteId, note, setActiveNoteId, onNoteDelete, onNotePin } = props;
+  const { id, title, body, updated, isPined } = note;
   const [isHoverDelete, setHoverDelete] = useState(false);
   const [isHoverNote, setHoverNote] = useState(false);
   const [isShowDelDialog, setShowDelDialog] = useState(false);
-
+  const pinNoteClick = (e: React.MouseEvent, noteId: number, toPin: boolean) => {
+    onNotePin(noteId, toPin);
+    setHoverNote(false);
+    e.stopPropagation();
+  }
   const confirmDelete = () => {
     setShowDelDialog(true);
   }
@@ -109,6 +120,9 @@ const NoteItemWrapper = (props: NoteItemWrapperProps) => {
     onClick={() => setActiveNoteId(id)}
     onMouseEnter={() => setHoverNote(true)}
     onMouseLeave={() => setHoverNote(false)}>
+    {isPined && <RightCornerPin onClick={e => pinNoteClick(e, id, false)}>
+      <PaintPinSvg width="40" height="40" />
+    </RightCornerPin>}
     <NotesSmallTitle>{title}</NotesSmallTitle>
     <NoteSmallBody>
       {body}
@@ -119,17 +133,20 @@ const NoteItemWrapper = (props: NoteItemWrapperProps) => {
         timeStyle: "short",
       })}
     </NotesSmallUpdate>
-    <NoteBtns isShowBtns={isHoverNote || isShowDelDialog}>
-      <NotePinBtn>
+    <NoteBtnArea>
+      {!isPined && <NotePinBtn
+        isShowBtns={isHoverNote || isShowDelDialog}
+        onClick={(e) => pinNoteClick(e, id, true)} >
         <PinSvg width="30" height="30" style={{ marginTop: '45px' }} />
-      </NotePinBtn>
+      </NotePinBtn>}
       <NoteDeleteBtn
+        isShowBtns={isHoverNote || isShowDelDialog}
         onMouseEnter={() => setHoverDelete(true)}
         onMouseLeave={() => setHoverDelete(false)}
         onClick={() => confirmDelete()}>
         <DeleteSvg width="25" height="25" style={{ marginTop: '47px' }} />
       </NoteDeleteBtn>
-    </NoteBtns>
+    </NoteBtnArea>
     <Dialog
       visible={isShowDelDialog}
       height={150}
@@ -161,6 +178,9 @@ const NotesSideBar = styled.div`
 
 const NoteScroll = styled.div`
   overflow-y: auto;
+  overflow-x: hidden;
+  width:106%;
+  padding-top: 20px;
   ::-webkit-scrollbar {
       width: 8px;
   }
@@ -175,6 +195,9 @@ const NoteScroll = styled.div`
       -webkit-border-radius: 2em;
       -moz-border-radius: 2em;
       border-radius:2em;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #d5d5d5;
   }
 `
 
@@ -197,7 +220,6 @@ const NoteAddBtn = styled.button`
   cursor: pointer;
   font-size: 1.25em;
   font-weight: bold;
-  margin-bottom: 1em;
   padding: 0.75em 0;
   width: 100%;
   &:hover {
@@ -209,7 +231,7 @@ const NoteAddBtn = styled.button`
 
 const NotesListItem = styled.div<{ clickActive: boolean, shaking: boolean }>`
   position: relative;
-  overflow: hidden;
+  width: 94%;
   cursor: pointer;
   border: 2px dotted;
   margin: 2px;
@@ -246,7 +268,6 @@ const NotesSmallUpdate = styled.div`
   text-align: right;
 `
 
-
 const NoteSmallBody = styled.div`
   padding: 0 10px;
   text-align: left;
@@ -255,32 +276,50 @@ const NoteSmallBody = styled.div`
   overflow: hidden;
 `
 
-const NotePinBtn = styled.div`
+const RightCornerPin = styled.div`
+  position: absolute;
+  display: inline-block;
+  right: -16px;
+  top: -16px;
+  z-index: 1;
+  height: 40px;
+`
+
+const NotePinBtn = styled.div<{ isShowBtns: boolean }>`
   background-color: ${props => ({
     light: '#fffa65',
     dark: '#F9F871'
   })[props.theme.color]};
+  position: absolute;
   width: var(--btnCardWidth);
-  `
+  height: 100%;
+  right: calc(0px - var(--btnCardWidth));
+  transition: right 0.23s;
+  ${props => props.isShowBtns && `right: var(--btnCardWidth);`}
+`
 
-const NoteDeleteBtn = styled.div`
+const NoteDeleteBtn = styled.div<{ isShowBtns: boolean }>`
   background-color: ${props => ({
     light: '#ff4d4d',
     dark: '#F35373'
   })[props.theme.color]};
+  position: absolute;
   width: var(--btnCardWidth);
+  height: 100%;
+  right: calc(0px - var(--btnCardWidth));
+  transition: right 0.23s;
+  ${props => props.isShowBtns && `right: 0;`}
 `
 
-const NoteBtns = styled.div<{ isShowBtns: boolean }>`
+const NoteBtnArea = styled.div`
   --btnCardWidth: 40px;
-  position: absolute;
-  top: 0;
-  right: calc(0px - var(--btnCardWidth) * 2);
   width: calc(var(--btnCardWidth) * 2);
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  right: 0;
   height: 100%;
-  display: flex;
-  transition: right 0.2s ease;
-  ${props => props.isShowBtns && `right: 0;`}
+  border-radius: 3px 10px 10px 3px;
 `
 
 const NotesPreview = styled.div`
