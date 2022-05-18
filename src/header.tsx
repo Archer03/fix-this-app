@@ -56,7 +56,7 @@ const NavLinkBtn = styled.div<{ isActive?: boolean }>`
   & a {
     text-decoration: none;
     color: ${props => ({
-      light: '-webkit-link',
+      light: '#551a8b',
       dark: '#eeeeee'
     })[props.theme.color]};
   }

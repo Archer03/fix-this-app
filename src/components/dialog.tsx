@@ -46,15 +46,15 @@ const Dialog = (props: DialogProps) => {
 
   return createPortal(<>
     <DialogLayout animationVisible={animationVisible} height={height} width={width}>
-      <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
+      <DialogWrapper>
         <Title>{title}</Title>
         <Divider />
         <div style={{ flexGrow: 1 }}>{props.children}</div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 3px 3px 0' }}>
+        <BtnSection>
           <CancelButton onClick={() => onCancel && onCancel()}>取消</CancelButton>
           <DeleteButton onClick={() => onOk && onOk()}>删除</DeleteButton>
-        </div>
-      </div>
+        </BtnSection>
+      </DialogWrapper>
     </DialogLayout>
     {showBackdrop && <ModalBackDrop
       animationVisible={animationVisible}
@@ -81,6 +81,12 @@ const DialogLayout = styled.div<{ width?: number, height?: number, animationVisi
   ${props => props.animationVisible && `top: 30vh; opacity: 1`}
 `
 
+const DialogWrapper = styled.div`
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+`
+
 const ModalBackDrop = styled.div<{ animationVisible: boolean }>`
     z-index: 1024;
     position: fixed;
@@ -93,6 +99,12 @@ const ModalBackDrop = styled.div<{ animationVisible: boolean }>`
     opacity: 0;
     pointer-events: none;
     ${props => props.animationVisible && `opacity: .5; pointer-events: auto;`}
+`
+
+const BtnSection = styled.section`
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 3px 3px 0
 `
 
 const CancelButton = styled.button`

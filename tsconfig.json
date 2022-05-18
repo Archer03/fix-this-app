@@ -13,7 +13,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["vite-plugin-svgr/client"]
   },
   "include": ["./src"]
 }
